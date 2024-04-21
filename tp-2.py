@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+from variables import *
 class Calentador:
 
     def __init__(self, temperatura, masa, tiempo, voltaje):
@@ -61,7 +61,7 @@ class Calentador:
         plt.show()
 
     
-calentador1=Calentador(30,1000,300,220)
+calentador1=Calentador(temperatura,masa,tiempo,voltaje)
 
 nuevo_delta = calentador1.calculo_delta_temp()
 
