@@ -43,7 +43,7 @@ waiting_times = []
 def generate_service_time():
     return max(1, int(random.gauss(SERVICE_TIME_MEAN, SERVICE_TIME_STD_DEV)))
 
-# Cliente
+
 class Customer:
     def __init__(self, arrival_time):
         self.arrival_time = arrival_time
@@ -73,7 +73,7 @@ while running and current_time <= TOTAL_SECONDS:
         customers.append(Customer(current_time))
         total_customers += 1
 
-    # Asignar clientes a boxes libres
+    # Asignar clientess
     for i in range(NUM_BOXES):
         if boxes[i] is None and waiting_queue:
             customer = waiting_queue.pop(0)
@@ -97,7 +97,7 @@ while running and current_time <= TOTAL_SECONDS:
             elif customer not in waiting_queue and customer.service_start_time is None:
                 waiting_queue.append(customer)
 
-    # Dibujar
+    # Dibuje
     screen.fill(WHITE)
     # Dibujar boxes
     for i in range(NUM_BOXES):
@@ -127,7 +127,8 @@ if waiting_times:
 else:
     min_waiting_time = max_waiting_time = 0
 
-# Resultados
+# Prints finales
+
 print(f'Total de clientes: {total_customers}')
 print(f'Clientes atendidos: {served_customers}')
 print(f'Clientes no atendidos: {unserved_customers}')
