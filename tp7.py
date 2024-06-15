@@ -1,6 +1,6 @@
 import pygame
 import random
-import math
+import imageio
 
 # Configuración inicial de Pygame
 pygame.init()
@@ -24,8 +24,8 @@ OPEN_HOURS = 4  # De 8 a 12 horas
 SECONDS_PER_HOUR = 3600
 TOTAL_SECONDS = OPEN_HOURS * SECONDS_PER_HOUR
 ARRIVAL_PROBABILITY = 1 / 144
-SERVICE_TIME_MEAN = 10 * 60  # 10 minutos en segundos
-SERVICE_TIME_STD_DEV = 5 * 60  # 5 minutos en segundos
+SERVICE_TIME_MIN = 5 * 60  # 5 minutos en segundos
+SERVICE_TIME_MAX = 15 * 60  # 15 minutos en segundos
 CLOSE_TIME = 12 * SECONDS_PER_HOUR
 
 # Variables de simulación
@@ -41,9 +41,9 @@ waiting_times = []
 
 # Función para generar tiempo de atención
 def generate_service_time():
-    return max(1, int(random.gauss(SERVICE_TIME_MEAN, SERVICE_TIME_STD_DEV)))
+    return int(random.uniform(SERVICE_TIME_MIN, SERVICE_TIME_MAX))
 
-
+# Cliente
 class Customer:
     def __init__(self, arrival_time):
         self.arrival_time = arrival_time
@@ -63,17 +63,18 @@ class Customer:
 
 # Main loop
 running = True
-while running and current_time <= TOTAL_SECONDS:
+frames = []  # Lista para almacenar las frames de la simulación
+while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
     # Generar nuevos clientes
-    if random.random() < ARRIVAL_PROBABILITY:
+    if random.random() < ARRIVAL_PROBABILITY and current_time <= TOTAL_SECONDS:
         customers.append(Customer(current_time))
         total_customers += 1
 
-    # Asignar clientess
+    # Asignar clientes a boxes libres
     for i in range(NUM_BOXES):
         if boxes[i] is None and waiting_queue:
             customer = waiting_queue.pop(0)
@@ -89,7 +90,7 @@ while running and current_time <= TOTAL_SECONDS:
                 served_customers += 1
 
     # Mover clientes a la cola
-    for customer in customers:
+    for customer in customers[:]:
         if not customer.is_being_served(current_time):
             if current_time - customer.arrival_time >= 30 * 60:
                 unserved_customers += 1
@@ -97,7 +98,7 @@ while running and current_time <= TOTAL_SECONDS:
             elif customer not in waiting_queue and customer.service_start_time is None:
                 waiting_queue.append(customer)
 
-    # Dibuje
+    # Dibujar
     screen.fill(WHITE)
     # Dibujar boxes
     for i in range(NUM_BOXES):
@@ -110,7 +111,14 @@ while running and current_time <= TOTAL_SECONDS:
 
     pygame.display.flip()
     clock.tick(60)
-    current_time += 1
+
+    # Avanzar el tiempo solo si la simulación está dentro del tiempo de apertura
+    if current_time <= TOTAL_SECONDS:
+        current_time += 1
+        # Agregar la frame actual a la lista de frames
+        frames.append(pygame.surfarray.array3d(screen))
+    else:
+        running = False
 
 pygame.quit()
 
@@ -127,13 +135,16 @@ if waiting_times:
 else:
     min_waiting_time = max_waiting_time = 0
 
-# Prints finales
-
+# Resultados
 print(f'Total de clientes: {total_customers}')
 print(f'Clientes atendidos: {served_customers}')
 print(f'Clientes no atendidos: {unserved_customers}')
-print(f'Tiempo mínimo de atención en box: {min_service_time / 60:.2f} minutos')
-print(f'Tiempo máximo de atención en box: {max_service_time / 60:.2f} minutos')
-print(f'Tiempo mínimo de espera en salón: {min_waiting_time / 60:.2f} minutos')
-print(f'Tiempo máximo de espera en salón: {max_waiting_time / 60:.2f} minutos')
+print(f'Clientes en el box: '+str(total_customers-unserved_customers-served_customers))
+print(f'Tiempo mínimo de atención en box: {min_service_time / 60:.2f} segundos')
+print(f'Tiempo máximo de atención en box: {max_service_time / 60:.2f} segundos')
+print(f'Tiempo mínimo de espera en salón: {min_waiting_time / 60:.2f} segundos')
+print(f'Tiempo máximo de espera en salón: {max_waiting_time / 60:.2f} segundos')
 print(f'Costo de operación: {NUM_BOXES * BOX_COST + unserved_customers * CUSTOMER_LOSS_COST}')
+
+# Guardar las frames como un archivo AVI
+imageio.mimsave('simulacion-tp7.avi', frames, fps=60)

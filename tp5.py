@@ -18,7 +18,7 @@ def tension_alimentacion_normal(option=1):
 
 def curva_familia(x, parametros):
     a, b, c = parametros
-    return a * np.exp(b * x) + c  
+    return a * np.exp(b * x) + c  # Cambiamos el signo para hacer que la temperatura aumente
 
 # Generar datos para las curvas de familia
 resistencias = resistencia_uniforme()
@@ -53,14 +53,14 @@ for temperatura in temperaturas_ambiente:
     plt.plot(x, curva_familia(x, parametros))
 plt.title('Curvas de Familia - Temperatura del Ambiente')
 
-# Curvas de tensión de alimentación
+# Curvas de tensión de alimentación (opción 1)
 plt.subplot(324)
 for tension in tensiones_alimentacion_1:
     parametros = [tension, 0.1, 0.5]
     plt.plot(x, curva_familia(x, parametros))
 plt.title('Curvas de Familia - Tensión de Alimentación (Media 12)')
 
-# Curvas de tensión de alimentación
+# Curvas de tensión de alimentación (opción 2)
 plt.subplot(325)
 for tension in tensiones_alimentacion_2:
     parametros = [tension, 0.1, 0.5]
